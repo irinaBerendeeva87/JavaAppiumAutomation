@@ -7,9 +7,9 @@ public class MainClassTest {
     MainClass mainClass = new MainClass();
 
     @Test
-    public void testGetClassNumber() {
-        boolean result = mainClass.getClassNumber() > 45;
-        assertTrue("Test failed. Expected value greater than 45", result);
+    public void testGetClassString() {
+        String str = mainClass.getClassString();
+        boolean containsSubstrings = str.contains("hello") || str.contains("Hello");
+        assertTrue("Expect: String contains 'hello' or 'Hello'!, actual :" + str, containsSubstrings);
     }
-
 }
