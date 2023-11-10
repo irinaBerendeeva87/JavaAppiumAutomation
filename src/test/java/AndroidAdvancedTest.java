@@ -33,8 +33,9 @@ public class AndroidAdvancedTest {
         capabilities.setCapability("appium:appActivity", ".main.MainActivity");
         capabilities.setCapability("appium:app", "/Users/irina/Desktop/JavaAppiumAutomation/JavaAppiumAutomation/apks/org.wikipedia_new.apk");
 
-        driver = new AndroidDriver(new URL("http://0.0.0.0:4723/"),capabilities);
+        driver = new AndroidDriver(new URL("http://0.0.0.0:4723/"), capabilities);
     }
+
     @After
     public void tearDown() {
         if (driver != null) {
@@ -69,7 +70,7 @@ public class AndroidAdvancedTest {
         String addToListBtn = "//*[@resource-id = 'org.wikipedia:id/snackbar_action'][@text = 'Add to list']";
         waitForElementAndClick(
                 By.xpath(addToListBtn),
-                "Can't find button " +addToListBtn,
+                "Can't find button " + addToListBtn,
                 ofSeconds(10));
         waitForElementAndSendKeys(
                 By.id("org.wikipedia:id/text_input"),
@@ -110,7 +111,7 @@ public class AndroidAdvancedTest {
         String viewListBtn = "org.wikipedia:id/snackbar_action";
         waitForElementAndClick(
                 By.id(viewListBtn),
-                "Can't find button "+ viewListBtn,
+                "Can't find button " + viewListBtn,
                 ofSeconds(5));
         swipeLeft(
                 By.xpath(locatorAppium),
@@ -128,39 +129,65 @@ public class AndroidAdvancedTest {
                 "Can't find the title",
                 ofSeconds(10));
         String articleTitle = elementTitle.getAttribute("content-desc");
-        assertEquals("We see unexpected title",articleTitle, "Java (programming language)");
+        assertEquals("We see unexpected title", articleTitle, "Java (programming language)");
     }
 
-    private WebElement waitForElementAndClick(By locator, String error_message, Duration duration) {
-        WebElement element = waitForElementPresent(locator, error_message,duration);
+    @Test
+    public void assertTitle() {
+        waitForElementAndClick(
+                By.id("org.wikipedia:id/fragment_onboarding_skip_button"),
+                "Can't find the Skip bottom",
+                ofSeconds(5));
+        waitForElementAndClick(
+                By.id("org.wikipedia:id/search_container"),
+                "Can't find 'Search Wikipedia'",
+                ofSeconds(5));
+        waitForElementAndSendKeys(
+                By.id("org.wikipedia:id/search_src_text"),
+                "Java",
+                "Can't find Java in search",
+                ofSeconds(5));
+        String locatorJava = "//*[@resource-id = 'org.wikipedia:id/search_results_list']//*[@text='Object-oriented programming language']";
+        waitForElementAndClick(
+                By.xpath(locatorJava),
+                "Can't find 'Java (programming language)' topic searching by Java",
+                ofSeconds(15));
+        String elementLocator = "//*[@content-desc= 'Java (programming language)']";
+        assertElementPresent(
+                By.xpath(elementLocator),
+                "We not found any results by request without  ");
+    }
+
+    private WebElement waitForElementAndClick(By by, String error_message, Duration duration) {
+        WebElement element = waitForElementPresent(by, error_message, duration);
         element.click();
         return element;
     }
 
-    private WebElement waitForElementPresent(By locator, String error_message, Duration duration) {
+    private WebElement waitForElementPresent(By by, String error_message, Duration duration) {
         WebDriverWait wait = new WebDriverWait(driver, duration);
         wait.withMessage(error_message + "\n");
-        return wait.until(ExpectedConditions.presenceOfElementLocated(locator));
+        return wait.until(ExpectedConditions.presenceOfElementLocated(by));
     }
 
     private WebElement waitForElementAndSendKeys(By locator, String value, String error_message, Duration duration) {
-        WebElement element = waitForElementPresent(locator, error_message,duration);
+        WebElement element = waitForElementPresent(locator, error_message, duration);
         element.sendKeys(value);
         return element;
     }
 
     private boolean waitForElementNotPresent(By locator, String error_message, Duration duration) {
-        WebDriverWait wait = new WebDriverWait(driver,duration);
+        WebDriverWait wait = new WebDriverWait(driver, duration);
         wait.withMessage(error_message + "\n");
         return wait.until(
                 ExpectedConditions.invisibilityOfElementLocated(locator));
     }
 
-    protected void swipeLeft(By by, String error_message){
+    protected void swipeLeft(By by, String error_message) {
         WebElement element = waitForElementPresent(by, error_message, ofSeconds(10));
         PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, "finger");
         Sequence swipeLeft = new Sequence(finger, 0);
-        int left_x = element.getRect().x + (element.getSize().width * 3/4);
+        int left_x = element.getRect().x + (element.getSize().width * 3 / 4);
         int upper_y = element.getRect().y + (element.getSize().height / 2);
         int right_x = element.getRect().x + (element.getSize().width / 4);
         int lower_y = element.getRect().y + (element.getSize().height / 2);
@@ -176,5 +203,22 @@ public class AndroidAdvancedTest {
                 finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
         driver.perform(Collections.singletonList(swipeLeft));
     }
-
+//method without wait
+    private void assertElementPresent(By by, String error_message) {
+        WebElement element = driver.findElement(by);
+        String articleTitle = element.getAttribute("content-desc");
+        if (articleTitle.isEmpty()) {
+            String defaultError = "An element " + by.toString() + " supposed to be present." ;
+            throw new AssertionError(defaultError + error_message);
+        }
+    }
+    //method with wait
+//    private void assertElementPresent(By by, String error_message) {
+//        WebElement element = waitForElementPresent((by), "testError", ofSeconds(15));
+//        String articleTitle = element.getAttribute("content-desc");
+//        if (articleTitle.isEmpty()) {
+//            String defaultError = "An element " + by.toString() + " supposed to be present." ;
+//            throw new AssertionError(defaultError + error_message);
+//        }
+//    }
 }
