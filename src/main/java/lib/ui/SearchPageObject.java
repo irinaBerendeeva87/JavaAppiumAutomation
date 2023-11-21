@@ -15,7 +15,8 @@ public class SearchPageObject extends MainPageObject {
             SEARCH_INPUT = "org.wikipedia:id/search_src_text",
             SEARCH_CANCEL_BUTTON = "org.wikipedia:id/search_close_btn",
             SEARCH_RESULT_LIST = "org.wikipedia:id/search_results_list",
-            SEARCH_RESULT_BY_SUBSTRING_TPL = "//*[contains(@text,'{SUBSTRING}')]";
+            SEARCH_RESULT_BY_SUBSTRING_TPL = "//*[contains(@text,'{SUBSTRING}')]",
+            SEARCH_LINE_TOOLBAR = "org.wikipedia:id/page_toolbar_button_search";
 
     public SearchPageObject(AppiumDriver driver) {
         super(driver);
@@ -41,44 +42,49 @@ public class SearchPageObject extends MainPageObject {
                 "Can't find and type into search input", ofSeconds(15));
     }
 
-    public void waitForSearchResult(String substring){
+    public void waitForSearchResult(String substring) {
         String searchResultXpath = getResultSearchElement(substring);
-        this.waitForElementPresent (By.xpath(searchResultXpath),
-                "Can't find search result with substring " +substring,
+        this.waitForElementPresent(By.xpath(searchResultXpath),
+                "Can't find search result with substring " + substring,
                 ofSeconds(5));
     }
 
-    public void waitForCancelButtonToAppear(){
+    public void waitForCancelButtonToAppear() {
         waitForElementPresent(By.id(SEARCH_CANCEL_BUTTON),
                 "Can't find search cancel button", ofSeconds(5));
     }
 
-    public void waitForCancelButtonToDisappear(){
-        waitForElementNotPresent(By.id(SEARCH_CANCEL_BUTTON),
-                "Search cancel button is still present", ofSeconds(5));
-    }
+//    public void waitForCancelButtonToDisappear() {
+//        waitForElementNotPresent(By.id(SEARCH_CANCEL_BUTTON),
+//                "Search cancel button is still present", ofSeconds(5));
+//    }
+
     public void clickCancelSearch() {
         this.waitForElementAndClick(By.id(SEARCH_CANCEL_BUTTON),
                 "Can't find  and click the Cancel button",
                 ofSeconds(5));
     }
 
-    public boolean SearchResultAfterClickCANCEL_BUTTON(){
+    public boolean SearchResultAfterClickCANCEL_BUTTON() {
         return waitForElementNotPresent(By.id(SEARCH_RESULT_LIST),
                 "Results are still present on the page", ofSeconds(5));
     }
 
-    public void assertPlaceholderText(){
-        WebElement element = waitForElementPresent(By.id(SEARCH_LINE_ELEMENT),"Can't find element",ofSeconds(5));
+    public void assertPlaceholderText() {
+        WebElement element = waitForElementPresent(By.id(SEARCH_LINE_ELEMENT), "Can't find element", ofSeconds(5));
         String expectedText = element.getAttribute("text");
-        assertElementHasText(By.xpath(SEARCH_LINE_PLACEHOLDER),expectedText,"Can't find 'Search Wikipedia'", ofSeconds(5));
+        assertElementHasText(By.xpath(SEARCH_LINE_PLACEHOLDER), expectedText, "Can't find 'Search Wikipedia'", ofSeconds(5));
     }
 
-    public void clickByArticleWithSubstring(String substring){
+    public void clickByArticleWithSubstring(String substring) {
         String searchResultXpath = getResultSearchElement(substring);
         waitForElementAndClick(By.xpath(searchResultXpath),
-                "Can't find  and click search result with substring " +substring,
-                ofSeconds(5));
+                "Can't find  and click search result with substring " + substring,
+                ofSeconds(15));
+    }
+
+    public void clickToolbarSearch() {
+        waitForElementAndClick(By.id(SEARCH_LINE_TOOLBAR),"Can't find search line in toolbar",ofSeconds(5));
     }
 
 }

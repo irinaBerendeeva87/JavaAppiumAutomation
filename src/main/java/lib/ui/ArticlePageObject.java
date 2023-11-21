@@ -14,7 +14,7 @@ public class ArticlePageObject extends MainPageObject {
     }
 
     private static final String
-            TITLE = "//*[contains(@content-desc, 'Appium')]",
+            ARTICLE_TITLE = "//*[@content-desc = 'Java (programming language)']",
             FOOTER_ELEMENT = "//*[contains(@content-desc, 'View article in browser')]",
             ARTICLE_SAVE_BOTTOM = "org.wikipedia:id/page_save",
             OPTION_ADD_TO_LIST_BOTTOM = "//*[@resource-id = 'org.wikipedia:id/snackbar_action'][@text = 'Add to list']",
@@ -23,9 +23,8 @@ public class ArticlePageObject extends MainPageObject {
             VIEW_LIST_BOTTOM = "org.wikipedia:id/snackbar_action",
             MY_LIST_FOLDER = "//*[@resource-id = 'org.wikipedia:id/item_title'][@text = 'My list']";
 
-
     public WebElement waitForTitleElement() {
-        return waitForElementPresent(By.xpath(TITLE),
+        return waitForElementPresent(By.xpath(ARTICLE_TITLE),
                 "Can't find the title",
                 Duration.ofSeconds(5));
     }
@@ -72,10 +71,11 @@ public class ArticlePageObject extends MainPageObject {
     public void openMyListViaViewList() {
         waitForElementAndClick(By.id(VIEW_LIST_BOTTOM), "Can't find 'VIEW_LIST' bottom ", ofSeconds(5));
     }
-    public void openArticleByTitle(String articleTitle){
-        waitForElementAndClick(
-                By.xpath(articleTitle),
-                "Can't find 'Java (programming language)' topic searching by Java",
-                ofSeconds(15));
+
+    public void assertTittleWithoutWaiting(){
+        assertElementPresent(
+                By.xpath(ARTICLE_TITLE),
+                "We not found any results by request without waiting");
     }
+
 }

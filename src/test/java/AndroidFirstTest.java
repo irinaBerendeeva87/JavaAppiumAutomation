@@ -12,13 +12,13 @@ public class AndroidFirstTest extends CoreTestCase {
 
     @Test
     public void testSearchFieldContainsText() {
-        searchPageObject.clickSkipBottom();
+        searchPageObject.clickSkipButton();
         searchPageObject.assertPlaceholderText();
     }
 
     @Test
     public void testCancelSearch() {
-        searchPageObject.clickSkipBottom();
+        searchPageObject.clickSkipButton();
         searchPageObject.clickSearchInput();
         searchPageObject.typeSearchLine("Netherlands");
         searchPageObject.waitForCancelButtonToAppear();

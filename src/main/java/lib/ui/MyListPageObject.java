@@ -5,11 +5,11 @@ import org.openqa.selenium.By;
 
 import static java.time.Duration.ofSeconds;
 
-public class MyListsPageObject extends MainPageObject {
+public class MyListPageObject extends MainPageObject {
     private static final String
             ARTICLE_BY_TITLE_TPL = "//*[@text = '{TITLE}']";
 
-    public MyListsPageObject(AppiumDriver driver) {
+    public MyListPageObject(AppiumDriver driver) {
         super(driver);
     }
 
@@ -37,5 +37,8 @@ public class MyListsPageObject extends MainPageObject {
         waitForArticleToDisappearedByTitle(articleTitle);
     }
 
-
+    public void openArticleByTitle(String articleTitle){
+        String articleXpath = getSavedArticle(articleTitle);
+        waitForElementAndClick(By.xpath(articleXpath), "Can't find and click on a title ", ofSeconds(5));
+    }
 }
