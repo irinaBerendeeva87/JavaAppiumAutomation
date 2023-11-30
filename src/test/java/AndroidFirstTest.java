@@ -1,23 +1,25 @@
 import lib.ui.SearchPageObject;
-import lid.CoreTestCase;
+import lid.TestBase;
 import org.junit.Test;
 
-public class AndroidFirstTest extends CoreTestCase {
+import static org.junit.Assert.assertTrue;
+
+
+public class AndroidFirstTest extends TestBase {
     private SearchPageObject searchPageObject;
 
-    protected void setUp() throws Exception {
-        super.setUp();
-        searchPageObject = new SearchPageObject(driver);
-    }
 
     @Test
     public void testSearchFieldContainsText() {
+        searchPageObject = new SearchPageObject(driver);
         searchPageObject.clickSkipButton();
         searchPageObject.assertPlaceholderText();
+        tearDown();
     }
 
     @Test
     public void testCancelSearch() {
+        searchPageObject = new SearchPageObject(driver);
         searchPageObject.clickSkipButton();
         searchPageObject.clickSearchInput();
         searchPageObject.typeSearchLine("Netherlands");

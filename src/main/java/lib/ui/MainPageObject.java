@@ -1,6 +1,7 @@
 package lib.ui;
 
 import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.PointerInput;
@@ -13,51 +14,54 @@ import java.util.Collections;
 import java.util.List;
 
 import static java.time.Duration.ofSeconds;
+import static org.openqa.selenium.support.PageFactory.initElements;
 
 public class MainPageObject {
     protected AppiumDriver driver;
 
     public MainPageObject(AppiumDriver driver) {
+        initElements(new AppiumFieldDecorator(driver), this);
         this.driver = driver;
     }
 
-    public WebElement waitForElementAndClick(By by, String error_message, Duration duration) {
-        WebElement element = waitForElementPresent(by, error_message, duration);
+
+    public void clickElement(WebElement element, Duration duration) {
+        waitForVisibility(element , duration);
         element.click();
+
+    }
+
+    public WebElement waitForVisibility(WebElement element, Duration duration) {
+        WebDriverWait wait = new WebDriverWait(driver, duration);
+        wait.until(ExpectedConditions.visibilityOf(element));
         return element;
     }
 
-    public WebElement waitForElementPresent(By by, String error_message, Duration duration) {
-        WebDriverWait wait = new WebDriverWait(driver, duration);
-        wait.withMessage(error_message + "\n");
-        return wait.until(ExpectedConditions.presenceOfElementLocated(by));
-    }
-
-    public WebElement waitForElementAndSendKeys(By locator, String value, String error_message, Duration duration) {
-        WebElement element = waitForElementPresent(locator, error_message, duration);
+    public void waitForElementAndSendKeys(WebElement element, String value,Duration duration) {
+        waitForVisibility(element, duration);
         element.sendKeys(value);
-        return element;
     }
 
-    public boolean waitForElementNotPresent(By locator, String error_message, Duration duration) {
+    public boolean waitForElementNotPresent(WebElement element, Duration duration) {
         WebDriverWait wait = new WebDriverWait(driver, duration);
-        wait.withMessage(error_message + "\n");
         return wait.until(
-                ExpectedConditions.invisibilityOfElementLocated(locator));
+                ExpectedConditions.invisibilityOf(element));
     }
-    public void assertElementHasText(By locator,String expectedText, String error_message, Duration duration) {
-        WebElement element = waitForElementPresent(locator, error_message, duration);
+
+    public void assertElementHasText(WebElement element, String expectedText, String errorMessage, Duration duration) {
+        waitForVisibility(element, duration);
         String actualText = element.getText();
         if (!actualText.equals(expectedText)) {
-            throw new AssertionError(error_message);
+            throw new AssertionError(errorMessage);
         }
-
     }
 
-    public int getAmountOfElements(By by){
-        List<WebElement> elements = driver.findElements(by);
+    public int getAmountOfElements(By element) {
+        List<WebElement> elements = driver.findElements(element);
         return elements.size();
+
     }
+
     public void swipeUp() {
         int startX = driver.manage().window().getSize().getWidth() / 2;
         int startY = driver.manage().window().getSize().getHeight() / 2;
@@ -70,15 +74,16 @@ public class MainPageObject {
         scroll.addAction(finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
         driver.perform(Collections.singletonList(scroll));
     }
+
     public void swipeQuick() {
         swipeUp();
     }
 
-    public void swipeToFindElement(By by, String error_message, int maxSwipes) {
+    public void swipeToFindElement(WebElement locator, int maxSwipes) {
         int alreadySwiped = 0;
-        while (driver.findElements(by).isEmpty()) {
+        while (driver.findElements((By) locator).isEmpty()) {
             if (alreadySwiped > maxSwipes) {
-                waitForElementPresent(by, "Can't find element by swipe up. \n", ofSeconds(5));
+                waitForVisibility(locator, ofSeconds(5));
                 return;
             }
             swipeQuick();
@@ -86,8 +91,8 @@ public class MainPageObject {
         }
     }
 
-    public void swipeLeft(By by, String error_message) {
-        WebElement element = waitForElementPresent(by, error_message, ofSeconds(10));
+    public void swipeLeft(WebElement element) {
+        waitForVisibility(element, ofSeconds(10));
         PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, "finger");
         Sequence swipeLeft = new Sequence(finger, 0);
         int left_x = element.getRect().x + (element.getSize().width * 3 / 4);
@@ -106,29 +111,26 @@ public class MainPageObject {
                 finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
         driver.perform(Collections.singletonList(swipeLeft));
     }
-    public String waitForElementGetAttribute(By by,String attribute, String error_message,Duration duration ){
-        WebElement element = waitForElementPresent(by, error_message, duration);
-        return element.getAttribute(attribute);
+
+    public String waitForElementGetAttribute(By locator, String attribute) {
+       return driver.findElement(locator).getAttribute(attribute);
     }
-    //method without wait
-    public void assertElementPresent(By by, String error_message) {
-        WebElement element = driver.findElement(by);
+
+    //method with wait
+    public void assertElementPresentWithWait(WebElement locator, String errorMessage) {
+        WebElement element = waitForVisibility(locator, ofSeconds(15));
         String articleTitle = element.getAttribute("content-desc");
         if (articleTitle.isEmpty()) {
-            String defaultError = "An element " + by.toString() + " supposed to be present." ;
-            throw new AssertionError(defaultError + error_message);
+            String defaultError = "An element " + locator.toString() + " supposed to be present." ;
+            throw new AssertionError(defaultError + errorMessage);
         }
-
     }
-//    public void rotation(){
-//    }
-    //method with wait
-//    public void assertElementPresent(By by, String error_message) {
-//        WebElement element = waitForElementPresent((by), "testError", ofSeconds(15));
-//        String articleTitle = element.getAttribute("content-desc");
-//        if (articleTitle.isEmpty()) {
-//            String defaultError = "An element " + by.toString() + " supposed to be present." ;
-//            throw new AssertionError(defaultError + error_message);
-//        }
-//    }
+    //method without wait
+    public void assertElementPresent(WebElement element,String attribute) {
+        String articleTitle = element.getAttribute(attribute);
+        if (articleTitle.isEmpty()) {
+            String defaultError = "An element " + element.toString() + " supposed to be present.";
+            throw new AssertionError( defaultError);
+        }
+    }
 }

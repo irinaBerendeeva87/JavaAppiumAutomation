@@ -1,6 +1,7 @@
 package lib.ui;
 
 import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.pagefactory.AndroidFindBy;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -8,15 +9,33 @@ import static java.time.Duration.ofSeconds;
 
 public class SearchPageObject extends MainPageObject {
 
+    @AndroidFindBy(id = "org.wikipedia:id/fragment_onboarding_skip_button")
+    WebElement skipButton;
+
+    @AndroidFindBy(id = "org.wikipedia:id/search_container")
+    WebElement searchLineEl;
+
+    @AndroidFindBy(xpath = "//*[contains(@text, 'Search Wikipedia')]")
+    WebElement searchLinePlaceholder;
+
+    @AndroidFindBy(id = "org.wikipedia:id/search_src_text")
+    WebElement searchInput;
+
+    @AndroidFindBy(id = "org.wikipedia:id/search_close_btn")
+    WebElement searchCancelButton;
+
+    @AndroidFindBy(id = "org.wikipedia:id/search_results_list")
+    WebElement searchResultList;
+
+    @AndroidFindBy(id = "org.wikipedia:id/page_toolbar_button_search")
+    WebElement searchLineToolbar;
+
+    @AndroidFindBy(xpath = "//*[@resource-id = 'org.wikipedia:id/search_results_list']/*[@class = 'android.view.ViewGroup']")
+    WebElement searchResultElement;
+
     private static final String
-            SKIP_BOTTOM = "org.wikipedia:id/fragment_onboarding_skip_button",
-            SEARCH_LINE_ELEMENT = "org.wikipedia:id/search_container",
-            SEARCH_LINE_PLACEHOLDER = "//*[contains(@text, 'Search Wikipedia')]",
-            SEARCH_INPUT = "org.wikipedia:id/search_src_text",
-            SEARCH_CANCEL_BUTTON = "org.wikipedia:id/search_close_btn",
-            SEARCH_RESULT_LIST = "org.wikipedia:id/search_results_list",
             SEARCH_RESULT_BY_SUBSTRING_TPL = "//*[contains(@text,'{SUBSTRING}')]",
-            SEARCH_LINE_TOOLBAR = "org.wikipedia:id/page_toolbar_button_search";
+            SEARCH_RESULT_EL = "//*[@resource-id = 'org.wikipedia:id/search_results_list']/*[@class = 'android.view.ViewGroup']";
 
     public SearchPageObject(AppiumDriver driver) {
         super(driver);
@@ -29,62 +48,60 @@ public class SearchPageObject extends MainPageObject {
     /*TEMPLATES METHODS */
 
     public void clickSkipButton() {
-        this.waitForElementAndClick(By.id(SKIP_BOTTOM), "Can't find the Skip bottom", ofSeconds(5));
+        clickElement(skipButton, ofSeconds(5));
     }
 
     public void clickSearchInput() {
-        this.waitForElementAndClick(By.id(SEARCH_LINE_ELEMENT),
-                "Can't find and click search line element", ofSeconds(10));
+        clickElement(searchLineEl, ofSeconds(10));
     }
 
     public void typeSearchLine(String searchLine) {
-        this.waitForElementAndSendKeys(By.id(SEARCH_INPUT), searchLine,
-                "Can't find and type into search input", ofSeconds(15));
+        waitForElementAndSendKeys(searchInput, searchLine, ofSeconds(15));
     }
 
     public void waitForSearchResult(String substring) {
         String searchResultXpath = getResultSearchElement(substring);
-        this.waitForElementPresent(By.xpath(searchResultXpath),
-                "Can't find search result with substring " + substring,
-                ofSeconds(5));
-    }
-
-    public void waitForCancelButtonToAppear() {
-        waitForElementPresent(By.id(SEARCH_CANCEL_BUTTON),
-                "Can't find search cancel button", ofSeconds(5));
-    }
-
-//    public void waitForCancelButtonToDisappear() {
-//        waitForElementNotPresent(By.id(SEARCH_CANCEL_BUTTON),
-//                "Search cancel button is still present", ofSeconds(5));
-//    }
-
-    public void clickCancelSearch() {
-        this.waitForElementAndClick(By.id(SEARCH_CANCEL_BUTTON),
-                "Can't find  and click the Cancel button",
-                ofSeconds(5));
-    }
-
-    public boolean SearchResultAfterClickCANCEL_BUTTON() {
-        return waitForElementNotPresent(By.id(SEARCH_RESULT_LIST),
-                "Results are still present on the page", ofSeconds(5));
-    }
-
-    public void assertPlaceholderText() {
-        WebElement element = waitForElementPresent(By.id(SEARCH_LINE_ELEMENT), "Can't find element", ofSeconds(5));
-        String expectedText = element.getAttribute("text");
-        assertElementHasText(By.xpath(SEARCH_LINE_PLACEHOLDER), expectedText, "Can't find 'Search Wikipedia'", ofSeconds(5));
+        WebElement searchResultElement = driver.findElement(By.xpath(searchResultXpath));
+        waitForVisibility(searchResultElement, ofSeconds(5));
     }
 
     public void clickByArticleWithSubstring(String substring) {
         String searchResultXpath = getResultSearchElement(substring);
-        waitForElementAndClick(By.xpath(searchResultXpath),
-                "Can't find  and click search result with substring " + substring,
-                ofSeconds(15));
+        WebElement searchResultElement = driver.findElement(By.xpath(searchResultXpath));
+        searchResultElement.click();
+    }
+
+    public void waitForCancelButtonToAppear() {
+        waitForVisibility(searchCancelButton, ofSeconds(5));
+    }
+
+    public void waitForCancelButtonToDisappear() {
+        waitForElementNotPresent(searchCancelButton, ofSeconds(5));
+    }
+
+    public void clickCancelSearch() {
+        this.clickElement(searchCancelButton, ofSeconds(5));
+    }
+
+    public boolean SearchResultAfterClickCANCEL_BUTTON() {
+        return waitForElementNotPresent(searchResultList, ofSeconds(5));
+    }
+
+    public void assertPlaceholderText() {
+        WebElement element = waitForVisibility(searchLinePlaceholder, ofSeconds(5));
+        String expectedText = element.getAttribute("text");
+        assertElementHasText(searchLinePlaceholder, expectedText, "Can't find 'Search Wikipedia'", ofSeconds(5));
     }
 
     public void clickToolbarSearch() {
-        waitForElementAndClick(By.id(SEARCH_LINE_TOOLBAR),"Can't find search line in toolbar",ofSeconds(5));
+        clickElement(searchLineToolbar, ofSeconds(5));
+    }
+
+    public int getAmountOfFoundArticles() {
+        waitForVisibility(searchResultElement, ofSeconds(15));
+        return getAmountOfElements(By.xpath(SEARCH_RESULT_EL));
+
+
     }
 
 }

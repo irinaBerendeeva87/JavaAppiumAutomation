@@ -1,80 +1,76 @@
 package lib.ui;
 
 import io.appium.java_client.AppiumDriver;
-import org.openqa.selenium.By;
+import io.appium.java_client.pagefactory.AndroidFindBy;
 import org.openqa.selenium.WebElement;
-
-import java.time.Duration;
 
 import static java.time.Duration.ofSeconds;
 
 public class ArticlePageObject extends MainPageObject {
+
     public ArticlePageObject(AppiumDriver driver) {
         super(driver);
     }
 
-    private static final String
-            ARTICLE_TITLE = "//*[@content-desc = 'Java (programming language)']",
-            FOOTER_ELEMENT = "//*[contains(@content-desc, 'View article in browser')]",
-            ARTICLE_SAVE_BOTTOM = "org.wikipedia:id/page_save",
-            OPTION_ADD_TO_LIST_BOTTOM = "//*[@resource-id = 'org.wikipedia:id/snackbar_action'][@text = 'Add to list']",
-            OPTION_OK_BOTTOM = "android:id/button1",
-            MY_LIST_NAME_INPUT = "org.wikipedia:id/text_input",
-            VIEW_LIST_BOTTOM = "org.wikipedia:id/snackbar_action",
-            MY_LIST_FOLDER = "//*[@resource-id = 'org.wikipedia:id/item_title'][@text = 'My list']";
+    @AndroidFindBy(xpath = "//*[@content-desc = 'Java (programming language)']")
+    WebElement articleTitle;
+
+    @AndroidFindBy(xpath = "//*[contains(@content-desc, 'View article in browser')]")
+    WebElement footerElement;
+
+    @AndroidFindBy(accessibility = "Save")
+    WebElement articleSaveBtn;
+
+    @AndroidFindBy(xpath = "//*[@resource-id = 'org.wikipedia:id/snackbar_action'][@text = 'Add to list']")
+    WebElement addToListBtn;
+
+    @AndroidFindBy(id = "android:id/button1")
+    WebElement okBtn;
+
+    @AndroidFindBy(id = "org.wikipedia:id/text_input")
+    WebElement myListNameInput;
+
+    @AndroidFindBy(id = "org.wikipedia:id/snackbar_action")
+    WebElement viewListBtn;
+
+    @AndroidFindBy(xpath = "//*[@resource-id = 'org.wikipedia:id/item_title'][@text = 'My list']")
+    WebElement myListFolder;
 
     public WebElement waitForTitleElement() {
-        return waitForElementPresent(By.xpath(ARTICLE_TITLE),
-                "Can't find the title",
-                Duration.ofSeconds(5));
+       return waitForVisibility(articleTitle, ofSeconds(5));
+
     }
 
-    public String getTitleElement() {
+    public String getArticleTitle() {
         WebElement titleElement = waitForTitleElement();
         return titleElement.getAttribute("content-desc");
     }
 
     public void swipeToFooter() {
-        swipeToFindElement(By.xpath(FOOTER_ELEMENT), "Can't find the end of the article", 20);
+        swipeToFindElement(footerElement, "Can't find the end of the article",
+                20);
     }
 
 
     public void addFirstArticleToMyList(String nameOfFolder) {
-        waitForElementAndClick(By.id(ARTICLE_SAVE_BOTTOM), "Can't find the Save bottom", ofSeconds(5));
-        waitForElementAndClick(
-                By.xpath(OPTION_ADD_TO_LIST_BOTTOM),
-                "Can't find and click 'Add to list bottom' ",
-                ofSeconds(10));
-        waitForElementAndSendKeys(
-                By.id(MY_LIST_NAME_INPUT),
-                nameOfFolder,
-                "Can't find 'My list' in the field",
-                ofSeconds(5));
-        waitForElementAndClick(
-                By.id(OPTION_OK_BOTTOM),
-                "Can't find 'Ok' button",
-                ofSeconds(5));
+        clickElement(articleSaveBtn, ofSeconds(5));
+        clickElement(addToListBtn, ofSeconds(10));
+        waitForElementAndSendKeys(myListNameInput, nameOfFolder, ofSeconds(5));
+        clickElement(okBtn, ofSeconds(5));
     }
 
     public void addSecondArticleToMyList() {
-        waitForElementAndClick(By.id(ARTICLE_SAVE_BOTTOM), "Can't find the Save bottom", ofSeconds(5));
-        waitForElementAndClick(
-                By.xpath(OPTION_ADD_TO_LIST_BOTTOM),
-                "Can't find and click 'Add to list' bottom ",
-                ofSeconds(10));
-        waitForElementAndClick(
-                By.xpath(MY_LIST_FOLDER),
-                "Can't find 'My list' bottom",
-                ofSeconds(10));
+        clickElement(articleSaveBtn, ofSeconds(5));
+        clickElement(addToListBtn, ofSeconds(10));
+        clickElement(myListFolder, ofSeconds(10));
     }
 
     public void openMyListViaViewList() {
-        waitForElementAndClick(By.id(VIEW_LIST_BOTTOM), "Can't find 'VIEW_LIST' bottom ", ofSeconds(5));
+        clickElement(viewListBtn, ofSeconds(5));
     }
 
     public void assertTittleWithoutWaiting(){
-        assertElementPresent(
-                By.xpath(ARTICLE_TITLE),
+        assertElementPresent(articleTitle,
                 "We not found any results by request without waiting");
     }
 
